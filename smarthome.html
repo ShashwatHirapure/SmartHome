@@ -1,0 +1,55 @@
+<html>
+<head>
+  <title>Smart Home By Dss</title>
+</head>
+<body>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js";
+
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7IE5Qe_7zY678fxbRGAMQWmaGsiYaqK4",
+            authDomain: "myapplication-ed890.firebaseapp.com",
+            databaseURL: "https://myapplication-ed890.firebaseio.com",
+            projectId: "myapplication-ed890",
+            storageBucket: "myapplication-ed890.appspot.com",
+            messagingSenderId: "450908792121",
+            appId: "1:450908792121:web:fa363f7b084a17416174e8"
+        };
+
+        // Initialize Firebase
+
+        const app = initializeApp(firebaseConfig);
+
+        window.lightoff = function lightoff() {
+            const db = getDatabase();
+            set(ref(db, 'HL1'), '0');
+        }
+        window.lighton = function lighton() {
+            const db = getDatabase();
+            set(ref(db, 'HL1'), '1');
+        }
+        window.fanoff = function fanoff() {
+            const db = getDatabase();
+            set(ref(db, 'HF1'), '0');
+        }
+        window.fanon = function fanon() {
+            const db = getDatabase();
+            set(ref(db, 'HF1'), '1');
+        }
+
+    </script>
+
+    <input type="button" onclick="lighton()" value="Light On">
+    <input type="button" onclick="lightoff()" value="Light Off">
+    <input type="button" onclick="fanon()" value="Fan On">
+    <input type="button" onclick="fanoff()" value="Fan Off">
+</body>
+</html>
