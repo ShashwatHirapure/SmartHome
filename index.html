@@ -1,18 +1,74 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Smart Home By Dss</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home By Dss</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .device {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 250px;
+        }
+        .button {
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .button.on {
+            background-color: #4caf50;
+            color: white;
+        }
+        .button.off {
+            background-color: #f44336;
+            color: white;
+        }
+        @media (max-width: 600px) {
+            .button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
 
+    <h1>Smart Home Control</h1>
+
+    <div class="device">
+        <h2>Light</h2>
+        <button class="button" id="lightToggle">Loading...</button>
+    </div>
+
+    <div class="device">
+        <h2>Fan</h2>
+        <button class="button" id="fanToggle">Loading...</button>
+    </div>
+
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js";
-
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-
-        // Your web app's Firebase configuration
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC7IE5Qe_7zY678fxbRGAMQWmaGsiYaqK4",
@@ -24,32 +80,48 @@
             appId: "1:450908792121:web:fa363f7b084a17416174e8"
         };
 
-        // Initialize Firebase
-
         const app = initializeApp(firebaseConfig);
+        const db = getDatabase();
 
-        window.lightoff = function lightoff() {
-            const db = getDatabase();
-            set(ref(db, 'HL1'), '1');
-        }
-        window.lighton = function lighton() {
-            const db = getDatabase();
-            set(ref(db, 'HL1'), '0');
-        }
-        window.fanoff = function fanoff() {
-            const db = getDatabase();
-            set(ref(db, 'HF1'), '1');
-        }
-        window.fanon = function fanon() {
-            const db = getDatabase();
-            set(ref(db, 'HF1'), '0');
+        let lightState = false;
+        let fanState = false;
+
+        // Syncing with Firebase
+        onValue(ref(db, 'HL1'), (snapshot) => {
+            lightState = snapshot.val() === '0'; // '0' means ON, '1' means OFF
+            updateLightButton();
+        });
+
+        onValue(ref(db, 'HF1'), (snapshot) => {
+            fanState = snapshot.val() === '0'; // '0' means ON, '1' means OFF
+            updateFanButton();
+        });
+
+        function updateLightButton() {
+            const button = document.getElementById('lightToggle');
+            button.textContent = lightState ? 'Turn Off' : 'Turn On';
+            button.classList.toggle('on', lightState);
+            button.classList.toggle('off', !lightState);
         }
 
+        function updateFanButton() {
+            const button = document.getElementById('fanToggle');
+            button.textContent = fanState ? 'Turn Off' : 'Turn On';
+            button.classList.toggle('on', fanState);
+            button.classList.toggle('off', !fanState);
+        }
+
+        document.getElementById('lightToggle').onclick = function() {
+            lightState = !lightState;
+            set(ref(db, 'HL1'), lightState ? '0' : '1');
+            updateLightButton();
+        };
+
+        document.getElementById('fanToggle').onclick = function() {
+            fanState = !fanState;
+            set(ref(db, 'HF1'), fanState ? '0' : '1');
+            updateFanButton();
+        };
     </script>
-
-    <input type="button" onclick="lighton()" value="Light On">
-    <input type="button" onclick="lightoff()" value="Light Off">
-    <input type="button" onclick="fanon()" value="Fan On">
-    <input type="button" onclick="fanoff()" value="Fan Off">
 </body>
 </html>
