@@ -30,19 +30,19 @@
 
         window.lightoff = function lightoff() {
             const db = getDatabase();
-            set(ref(db, 'HL1'), '0');
+            set(ref(db, 'HL1'), '1');
         }
         window.lighton = function lighton() {
             const db = getDatabase();
-            set(ref(db, 'HL1'), '1');
+            set(ref(db, 'HL1'), '0');
         }
         window.fanoff = function fanoff() {
             const db = getDatabase();
-            set(ref(db, 'HF1'), '0');
+            set(ref(db, 'HF1'), '1');
         }
         window.fanon = function fanon() {
             const db = getDatabase();
-            set(ref(db, 'HF1'), '1');
+            set(ref(db, 'HF1'), '0');
         }
 
     </script>
