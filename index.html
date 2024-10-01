@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home By Dss</title>
+    <title>Smart Home By DSS</title>
     <style>
         body {
             display: flex;
@@ -66,7 +66,7 @@
         <button class="button" id="fanToggle">Loading...</button>
     </div>
 
-  <script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js";
 
@@ -85,6 +85,15 @@
 
     let lightState = false;
     let fanState = false;
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(function(error) {
+            console.error('Service Worker registration failed:', error);
+        });
+    }
 
     // Request permission for notifications
     Notification.requestPermission().then(permission => {
@@ -121,25 +130,17 @@
     }
 
     function showNotification() {
-        if (Notification.permission === "granted") {
-            const notification = new Notification("Smart Home Control", {
-                body: `Light is ${lightState ? 'ON' : 'OFF'}, Fan is ${fanState ? 'ON' : 'OFF'}.`,
-                actions: [
-                    { action: 'toggleLight', title: lightState ? 'Turn Off Light' : 'Turn On Light' },
-                    { action: 'toggleFan', title: fanState ? 'Turn Off Fan' : 'Turn On Fan' }
-                ],
-                silent: true
+        if (Notification.permission === "granted" && navigator.serviceWorker) {
+            navigator.serviceWorker.ready.then(function(registration) {
+                registration.showNotification("Smart Home Control", {
+                    body: `Light is ${lightState ? 'ON' : 'OFF'}, Fan is ${fanState ? 'ON' : 'OFF'}.`,
+                    actions: [
+                        { action: 'toggleLight', title: lightState ? 'Turn Off Light' : 'Turn On Light' },
+                        { action: 'toggleFan', title: fanState ? 'Turn Off Fan' : 'Turn On Fan' }
+                    ],
+                    silent: true
+                });
             });
-
-            notification.onclick = (event) => {
-                event.preventDefault();
-                if (event.action === 'toggleLight') {
-                    toggleLight();
-                } else if (event.action === 'toggleFan') {
-                    toggleFan();
-                }
-                notification.close();
-            };
         }
     }
 
@@ -157,6 +158,15 @@
 
     document.getElementById('lightToggle').onclick = toggleLight;
     document.getElementById('fanToggle').onclick = toggleFan;
+
+    // Add the message listener to handle service worker actions
+    navigator.serviceWorker.addEventListener('message', function(event) {
+        if (event.data.action === 'toggleLight') {
+            toggleLight(); // Toggle light state
+        } else if (event.data.action === 'toggleFan') {
+            toggleFan(); // Toggle fan state
+        }
+    });
 </script>
 
 </body>
