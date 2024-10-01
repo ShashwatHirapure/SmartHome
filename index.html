@@ -66,7 +66,7 @@
         <button class="button" id="fanToggle">Loading...</button>
     </div>
 
-    <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js";
 
@@ -88,7 +88,7 @@
 
     // Register service worker
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/SmartHome/sw.js').then(function(registration) {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
             console.log('Service Worker registered with scope:', registration.scope);
         }).catch(function(error) {
             console.error('Service Worker registration failed:', error);
@@ -134,11 +134,13 @@
             navigator.serviceWorker.ready.then(function(registration) {
                 registration.showNotification("Smart Home Control", {
                     body: `Light is ${lightState ? 'ON' : 'OFF'}, Fan is ${fanState ? 'ON' : 'OFF'}.`,
+                    tag: 'smart-home-control', // Unique tag to replace previous notifications
+                    renotify: true, // Notify user again with the updated notification
                     actions: [
                         { action: 'toggleLight', title: lightState ? 'Turn Off Light' : 'Turn On Light' },
                         { action: 'toggleFan', title: fanState ? 'Turn Off Fan' : 'Turn On Fan' }
                     ],
-                    silent: true
+                    silent: true // No sound for notification
                 });
             });
         }
