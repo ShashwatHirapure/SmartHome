@@ -130,21 +130,23 @@
     }
 
     function showNotification() {
-        if (Notification.permission === "granted" && navigator.serviceWorker) {
-            navigator.serviceWorker.ready.then(function(registration) {
-                registration.showNotification("Smart Home Control", {
-                    body: `Light is ${lightState ? 'ON' : 'OFF'}, Fan is ${fanState ? 'ON' : 'OFF'}.`,
-                    tag: 'smart-home-control', // Unique tag to replace previous notifications
-                    renotify: true, // Notify user again with the updated notification
-                    actions: [
-                        { action: 'toggleLight', title: lightState ? 'Off Light' : 'On Light' },
-                        { action: 'toggleFan', title: fanState ? 'Off Fan' : 'On Fan' }
-                    ],
-                    silent: true // No sound for notification
-                });
+    if (Notification.permission === "granted" && navigator.serviceWorker) {
+        navigator.serviceWorker.ready.then(function(registration) {
+            registration.showNotification("Smart Home Control", {
+                body: `Light is ${lightState ? 'ON' : 'OFF'}, Fan is ${fanState ? 'ON' : 'OFF'}.`,
+                tag: 'smart-home-control', // Unique tag to replace previous notifications
+                renotify: true, // Notify user again with the updated notification
+                requireInteraction: true, // Make the notification persistent (non-dismissable by swipe)
+                actions: [
+                    { action: 'toggleLight', title: lightState ? 'Turn Off Light' : 'Turn On Light' },
+                    { action: 'toggleFan', title: fanState ? 'Turn Off Fan' : 'Turn On Fan' }
+                ],
+                silent: true // No sound for notification
             });
-        }
+        });
     }
+}
+
 
     function toggleLight() {
         lightState = !lightState;
