@@ -66,62 +66,98 @@
         <button class="button" id="fanToggle">Loading...</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.8/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC7IE5Qe_7zY678fxbRGAMQWmaGsiYaqK4",
-            authDomain: "myapplication-ed890.firebaseapp.com",
-            databaseURL: "https://myapplication-ed890.firebaseio.com",
-            projectId: "myapplication-ed890",
-            storageBucket: "myapplication-ed890.appspot.com",
-            messagingSenderId: "450908792121",
-            appId: "1:450908792121:web:fa363f7b084a17416174e8"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7IE5Qe_7zY678fxbRGAMQWmaGsiYaqK4",
+        authDomain: "myapplication-ed890.firebaseapp.com",
+        databaseURL: "https://myapplication-ed890.firebaseio.com",
+        projectId: "myapplication-ed890",
+        storageBucket: "myapplication-ed890.appspot.com",
+        messagingSenderId: "450908792121",
+        appId: "1:450908792121:web:fa363f7b084a17416174e8"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
 
-        let lightState = false;
-        let fanState = false;
+    let lightState = false;
+    let fanState = false;
 
-        // Syncing with Firebase
-        onValue(ref(db, 'HL1'), (snapshot) => {
-            lightState = snapshot.val() === '0'; // '0' means ON, '1' means OFF
-            updateLightButton();
-        });
-
-        onValue(ref(db, 'HF1'), (snapshot) => {
-            fanState = snapshot.val() === '0'; // '0' means ON, '1' means OFF
-            updateFanButton();
-        });
-
-        function updateLightButton() {
-            const button = document.getElementById('lightToggle');
-            button.textContent = lightState ? 'Turn Off' : 'Turn On';
-            button.classList.toggle('on', lightState);
-            button.classList.toggle('off', !lightState);
+    // Request permission for notifications
+    Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+            showNotification();
         }
+    });
 
-        function updateFanButton() {
-            const button = document.getElementById('fanToggle');
-            button.textContent = fanState ? 'Turn Off' : 'Turn On';
-            button.classList.toggle('on', fanState);
-            button.classList.toggle('off', !fanState);
+    // Syncing with Firebase
+    onValue(ref(db, 'HL1'), (snapshot) => {
+        lightState = snapshot.val() === '0'; // '0' means ON, '1' means OFF
+        updateLightButton();
+        showNotification(); // Update notification when state changes
+    });
+
+    onValue(ref(db, 'HF1'), (snapshot) => {
+        fanState = snapshot.val() === '0'; // '0' means ON, '1' means OFF
+        updateFanButton();
+        showNotification(); // Update notification when state changes
+    });
+
+    function updateLightButton() {
+        const button = document.getElementById('lightToggle');
+        button.textContent = lightState ? 'Turn Off' : 'Turn On';
+        button.classList.toggle('on', lightState);
+        button.classList.toggle('off', !lightState);
+    }
+
+    function updateFanButton() {
+        const button = document.getElementById('fanToggle');
+        button.textContent = fanState ? 'Turn Off' : 'Turn On';
+        button.classList.toggle('on', fanState);
+        button.classList.toggle('off', !fanState);
+    }
+
+    function showNotification() {
+        if (Notification.permission === "granted") {
+            const notification = new Notification("Smart Home Control", {
+                body: `Light is ${lightState ? 'ON' : 'OFF'}, Fan is ${fanState ? 'ON' : 'OFF'}.`,
+                actions: [
+                    { action: 'toggleLight', title: lightState ? 'Turn Off Light' : 'Turn On Light' },
+                    { action: 'toggleFan', title: fanState ? 'Turn Off Fan' : 'Turn On Fan' }
+                ],
+                silent: true
+            });
+
+            notification.onclick = (event) => {
+                event.preventDefault();
+                if (event.action === 'toggleLight') {
+                    toggleLight();
+                } else if (event.action === 'toggleFan') {
+                    toggleFan();
+                }
+                notification.close();
+            };
         }
+    }
 
-        document.getElementById('lightToggle').onclick = function() {
-            lightState = !lightState;
-            set(ref(db, 'HL1'), lightState ? '0' : '1');
-            updateLightButton();
-        };
+    function toggleLight() {
+        lightState = !lightState;
+        set(ref(db, 'HL1'), lightState ? '0' : '1');
+        updateLightButton();
+    }
 
-        document.getElementById('fanToggle').onclick = function() {
-            fanState = !fanState;
-            set(ref(db, 'HF1'), fanState ? '0' : '1');
-            updateFanButton();
-        };
-    </script>
+    function toggleFan() {
+        fanState = !fanState;
+        set(ref(db, 'HF1'), fanState ? '0' : '1');
+        updateFanButton();
+    }
+
+    document.getElementById('lightToggle').onclick = toggleLight;
+    document.getElementById('fanToggle').onclick = toggleFan;
+</script>
+
 </body>
 </html>
